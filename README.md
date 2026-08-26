@@ -1,16 +1,26 @@
-# React + Vite
+# Oklahoma Burgers & Ribs — Front de pedidos
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Front de la página de pedidos online del local, construido con React + Vite + Tailwind CSS.
+Reemplaza la página de menú/pedidos que hoy corre en Fudo.
 
-Currently, two official plugins are available:
+## Estado actual
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Menú por categorías, buscador, carrito y flujo de checkout (delivery/retiro, horario, datos de contacto).
+- Datos de menú reales en [`src/data/menu.js`](src/data/menu.js) (nombres, descripciones y precios).
+- **Simulado por ahora**, pendiente de conectar a un backend real:
+  - Cotización de delivery (pensado para Uber Direct).
+  - Pago online (pensado para Webpay / Mercado Pago).
+  - Panel de pedidos en tiempo real.
 
-## React Compiler
+## Cómo correrlo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the Oxlint configuration
+## Pendiente
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- Reemplazar logo y fotos de productos placeholder por las reales (`src/assets/products/`, campo `image` en `menu.js`).
+- Backend (Firebase/Supabase) para pedidos en tiempo real.
+- Integración real de Uber Direct y pasarela de pago.
