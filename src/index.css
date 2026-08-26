@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=BioRhyme:wght@400;700;800&display=swap');
+
+@theme {
+  --font-sans: 'Barlow', system-ui, sans-serif;
+  --font-heading: 'BioRhyme', serif;
+
+  --color-cream: #faf3e6;
+  --color-cream-dark: #f2e6d0;
+  --color-ink: #1f1f1f;
+  --color-tan: #f2d2a3;
+  --color-tan-dark: #e3b877;
+  --color-brand: #b8471f;
+  --color-brand-dark: #8f3517;
+  --color-brand-light: #d9662f;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
