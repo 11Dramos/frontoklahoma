@@ -1,24 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/format'
+import { createOrder, getDeliveryQuote, simulatePayment } from '../lib/api'
 
 const PAYMENT_METHODS = [
   { id: 'webpay', label: 'Webpay Plus', icon: '💳' },
   { id: 'mercadopago', label: 'Mercado Pago', icon: '🅼' },
 ]
 
-// Cotización simulada de Uber Direct. Cuando exista el backend, esto se
-// reemplaza por una llamada real a la API (Create Quote) usando la dirección.
-function mockDeliveryQuote(address) {
-  if (!address.trim()) return null
-  const fee = 2500 + (address.length % 5) * 300
-  const etaMin = 25 + (address.length % 4) * 5
-  return { fee, etaMin }
-}
-
 export default function CheckoutFlow({ open, onClose, fulfillment }) {
   const { items, subtotal, clearCart } = useCart()
   const [address, setAddress] = useState('')
+  const [quote, setQuote] = useState(null)
   const [scheduleMode, setScheduleMode] = useState('asap')
   const [scheduleDay, setScheduleDay] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
@@ -26,11 +19,20 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
   const [phone, setPhone] = useState('')
   const [payment, setPayment] = useState('webpay')
   const [status, setStatus] = useState('form') // form | processing | success
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const quote = useMemo(
-    () => (fulfillment === 'delivery' ? mockDeliveryQuote(address) : null),
-    [fulfillment, address],
-  )
+  // Cotiza el delivery contra el backend cada vez que cambia la dirección
+  // (con un pequeño debounce para no disparar una request por cada tecla).
+  useEffect(() => {
+    if (fulfillment !== 'delivery' || !address.trim()) {
+      setQuote(null)
+      return
+    }
+    const timer = setTimeout(() => {
+      getDeliveryQuote(address).then(setQuote).catch(() => setQuote(null))
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [address, fulfillment])
 
   const deliveryFee = quote?.fee ?? 0
   const total = subtotal + deliveryFee
@@ -39,23 +41,38 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
     items.length > 0 &&
     name.trim() &&
     phone.trim() &&
-    (fulfillment !== 'delivery' || address.trim()) &&
+    (fulfillment !== 'delivery' || (address.trim() && quote)) &&
     (scheduleMode !== 'schedule' || (scheduleDay && scheduleTime))
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     if (!canSubmit) return
+    setErrorMsg('')
     setStatus('processing')
-    // Simulación: aquí se reemplaza por la llamada real a Webpay/Mercado Pago
-    // y por el guardado del pedido en el panel en tiempo real (backend futuro).
-    setTimeout(() => {
+    try {
+      const paymentResult = await simulatePayment(payment, total)
+
+      await createOrder({
+        items: items.map((i) => ({ productId: i.product.id, qty: i.qty })),
+        fulfillment,
+        schedule: { mode: scheduleMode, day: scheduleDay, time: scheduleTime },
+        customer: { name, phone },
+        address: fulfillment === 'delivery' ? address : '',
+        delivery: fulfillment === 'delivery' ? quote : undefined,
+        payment: { method: payment, status: paymentResult.status },
+      })
+
       setStatus('success')
       clearCart()
-    }, 1400)
+    } catch (err) {
+      setErrorMsg(err.message || 'No pudimos procesar el pedido')
+      setStatus('form')
+    }
   }
 
   function handleClose() {
     setStatus('form')
+    setErrorMsg('')
     onClose()
   }
 
@@ -70,8 +87,9 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
             <span className="text-5xl">✅</span>
             <h2 className="font-heading text-xl font-bold">¡Pedido confirmado!</h2>
             <p className="text-ink/60 text-sm max-w-xs">
-              Este es un flujo de demostración: el pago y el envío del pedido al
-              panel del local aún son simulados, hasta conectar el backend real.
+              Tu pedido quedó guardado en el sistema. El pago y la cotización
+              de envío todavía son simulados, hasta conectar Webpay/Mercado
+              Pago y Uber Direct reales.
             </p>
             <button
               type="button"
@@ -108,11 +126,17 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                       placeholder="Calle, número, depto/casa"
                       className="w-full rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
                     />
-                    {quote && (
+                    {address.trim() && (
                       <p className="text-xs text-ink/50 mt-2">
-                        Envío estimado (simulado, vía Uber Direct):{' '}
-                        <strong>{formatPrice(quote.fee)}</strong> · llega en ~
-                        {quote.etaMin} min
+                        {quote ? (
+                          <>
+                            Envío estimado (simulado, vía Uber Direct):{' '}
+                            <strong>{formatPrice(quote.fee)}</strong> · llega en ~
+                            {quote.etaMin} min
+                          </>
+                        ) : (
+                          'Cotizando envío…'
+                        )}
                       </p>
                     )}
                   </>
@@ -225,6 +249,12 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                   <span>{formatPrice(total)}</span>
                 </div>
               </section>
+
+              {errorMsg && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                  {errorMsg}
+                </p>
+              )}
             </div>
 
             <div className="sticky bottom-0 bg-cream px-4 py-4 border-t border-ink/10">

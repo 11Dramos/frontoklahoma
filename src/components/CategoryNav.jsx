@@ -1,6 +1,4 @@
-import { categories } from '../data/menu'
-
-export default function CategoryNav({ activeCategory, onSelect }) {
+export default function CategoryNav({ categories, activeCategory, onSelect }) {
   return (
     <nav className="sticky top-0 z-20 bg-cream/95 backdrop-blur border-b border-ink/10">
       <div className="max-w-5xl mx-auto flex gap-2 overflow-x-auto px-4 py-3 scrollbar-none">
