@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/format'
-import { createOrder, getDeliveryQuote, simulatePayment } from '../lib/api'
+import { createMercadoPagoPreference, createOrder, getDeliveryQuote, simulatePayment } from '../lib/api'
 
 const PAYMENT_METHODS = [
   { id: 'webpay', label: 'Webpay Plus', icon: '💳' },
@@ -50,18 +50,27 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
     setErrorMsg('')
     setStatus('processing')
     try {
-      const paymentResult = await simulatePayment(payment, total)
-
-      await createOrder({
+      const order = await createOrder({
         items: items.map((i) => ({ productId: i.product.id, qty: i.qty })),
         fulfillment,
         schedule: { mode: scheduleMode, day: scheduleDay, time: scheduleTime },
         customer: { name, phone },
         address: fulfillment === 'delivery' ? address : '',
         delivery: fulfillment === 'delivery' ? quote : undefined,
-        payment: { method: payment, status: paymentResult.status },
+        payment: { method: payment },
       })
 
+      if (payment === 'mercadopago') {
+        // Pago real: se redirige a Mercado Pago, el pedido queda "pending"
+        // hasta que confirmen el pago por webhook.
+        const { init_point } = await createMercadoPagoPreference(order._id)
+        clearCart()
+        window.location.href = init_point
+        return
+      }
+
+      // Webpay sigue simulado por ahora.
+      await simulatePayment(payment, total)
       setStatus('success')
       clearCart()
     } catch (err) {
@@ -205,7 +214,7 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
               </section>
 
               <section>
-                <h3 className="font-semibold text-sm mb-2">💳 Pago (simulado)</h3>
+                <h3 className="font-semibold text-sm mb-2">💳 Pago</h3>
                 <div className="flex flex-col gap-2">
                   {PAYMENT_METHODS.map((m) => (
                     <label
@@ -229,7 +238,9 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                   ))}
                 </div>
                 <p className="text-xs text-ink/40 mt-2">
-                  Pasarela de pago pendiente de integración real.
+                  {payment === 'mercadopago'
+                    ? 'Te vamos a redirigir a Mercado Pago para pagar de verdad.'
+                    : 'Webpay todavía está simulado, pendiente de integración real.'}
                 </p>
               </section>
 

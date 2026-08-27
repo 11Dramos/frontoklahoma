@@ -36,3 +36,14 @@ export function createOrder(order) {
     body: JSON.stringify(order),
   })
 }
+
+export function getOrder(id) {
+  return request(`/api/orders/${id}`)
+}
+
+export function createMercadoPagoPreference(orderId) {
+  return request('/api/payments/mercadopago/preference', {
+    method: 'POST',
+    body: JSON.stringify({ orderId }),
+  })
+}

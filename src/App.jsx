@@ -9,8 +9,19 @@ import CartBar from './components/CartBar'
 import CartDrawer from './components/CartDrawer'
 import CheckoutFlow from './components/CheckoutFlow'
 import Footer from './components/Footer'
+import PaymentResult from './components/PaymentResult'
+
+const PAYMENT_RESULT_PATHS = ['/pago/exito', '/pago/error', '/pago/pendiente']
 
 function App() {
+  if (PAYMENT_RESULT_PATHS.includes(window.location.pathname)) {
+    return <PaymentResult />
+  }
+
+  return <MenuApp />
+}
+
+function MenuApp() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [menuStatus, setMenuStatus] = useState('loading') // loading | ready | error
