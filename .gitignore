@@ -16,9 +16,6 @@ dist-ssr
 # Config local de Claude Code (herramienta de desarrollo, no parte del proyecto)
 .claude
 
-# Backend (proyecto de git aparte)
-server/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
