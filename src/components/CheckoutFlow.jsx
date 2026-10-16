@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/format'
-import { createMercadoPagoPreference, createOrder, getDeliveryQuote, simulatePayment } from '../lib/api'
+import {
+  createMercadoPagoPreference,
+  createOrder,
+  getDeliveryQuote,
+  simulatePayment,
+} from '../lib/api'
 
 const PAYMENT_METHODS = [
   { id: 'webpay', label: 'Webpay Plus', icon: '💳' },
@@ -35,7 +40,8 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
   }, [address, fulfillment])
 
   // La cotizacion solo vale si corresponde a la direccion actual y al modo delivery.
-  const quote = fulfillment === 'delivery' && quoteState?.address === address ? quoteState.data : null
+  const quote =
+    fulfillment === 'delivery' && quoteState?.address === address ? quoteState.data : null
 
   const deliveryFee = quote?.fee ?? 0
   const total = subtotal + deliveryFee
@@ -99,9 +105,8 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
             <span className="text-5xl">✅</span>
             <h2 className="font-heading text-xl font-bold">¡Pedido confirmado!</h2>
             <p className="text-ink/60 text-sm max-w-xs">
-              Tu pedido quedó guardado en el sistema. El pago y la cotización
-              de envío todavía son simulados, hasta conectar Webpay/Mercado
-              Pago y Uber Direct reales.
+              Tu pedido quedó guardado en el sistema. El pago y la cotización de envío todavía son
+              simulados, hasta conectar Webpay/Mercado Pago y Uber Direct reales.
             </p>
             <button
               type="button"
@@ -143,8 +148,7 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                         {quote ? (
                           <>
                             Envío estimado (simulado, vía Uber Direct):{' '}
-                            <strong>{formatPrice(quote.fee)}</strong> · llega en ~
-                            {quote.etaMin} min
+                            <strong>{formatPrice(quote.fee)}</strong> · llega en ~{quote.etaMin} min
                           </>
                         ) : (
                           'Cotizando envío…'
@@ -169,9 +173,7 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                       type="button"
                       onClick={() => setScheduleMode(opt.id)}
                       className={`flex-1 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                        scheduleMode === opt.id
-                          ? 'bg-brand text-white shadow'
-                          : 'text-ink/70'
+                        scheduleMode === opt.id ? 'bg-brand text-white shadow' : 'text-ink/70'
                       }`}
                     >
                       {opt.label}
@@ -223,9 +225,7 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
                     <label
                       key={m.id}
                       className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition-colors ${
-                        payment === m.id
-                          ? 'border-brand bg-brand/5'
-                          : 'border-ink/15 bg-white'
+                        payment === m.id ? 'border-brand bg-brand/5' : 'border-ink/15 bg-white'
                       }`}
                     >
                       <input
@@ -265,9 +265,7 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
               </section>
 
               {errorMsg && (
-                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
-                  {errorMsg}
-                </p>
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{errorMsg}</p>
               )}
             </div>
 

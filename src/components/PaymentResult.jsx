@@ -15,7 +15,9 @@ export default function PaymentResult() {
 
   useEffect(() => {
     if (!orderId) return
-    getOrder(orderId).then(setOrder).catch(() => {})
+    getOrder(orderId)
+      .then(setOrder)
+      .catch(() => {})
   }, [orderId])
 
   return (

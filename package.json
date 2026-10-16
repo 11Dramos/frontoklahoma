@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "oxlint src",
     "preview": "vite preview",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -26,12 +28,17 @@
     "lint-staged": "^17.6.0",
     "oxlint": "^1.79.0",
     "postcss": "^8.5.26",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2"
   },
   "lint-staged": {
     "*.{js,jsx,mjs}": [
+      "prettier --write",
       "oxlint"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
     ]
   }
 }

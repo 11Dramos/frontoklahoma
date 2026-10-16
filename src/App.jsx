@@ -54,17 +54,13 @@ function MenuApp() {
     if (!search.trim()) return products
     const q = search.trim().toLowerCase()
     return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q),
+      (p) => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q),
     )
   }, [search, products])
 
   function handleSelectCategory(id) {
     setActiveCategory(id)
-    document
-      .getElementById(`cat-${id}`)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   if (menuStatus === 'loading') {
@@ -113,9 +109,7 @@ function MenuApp() {
           ))}
 
           {search.trim() && filteredProducts.length === 0 && (
-            <p className="text-center text-ink/50 py-16">
-              No encontramos ningún producto
-            </p>
+            <p className="text-center text-ink/50 py-16">No encontramos ningún producto</p>
           )}
         </main>
 

@@ -9,9 +9,7 @@ export function CartProvider({ children }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === product.id)
       if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i,
-        )
+        return prev.map((i) => (i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i))
       }
       return [...prev, { product, qty: 1 }]
     })
@@ -26,19 +24,14 @@ export function CartProvider({ children }) {
       removeItem(productId)
       return
     }
-    setItems((prev) =>
-      prev.map((i) => (i.product.id === productId ? { ...i, qty } : i)),
-    )
+    setItems((prev) => prev.map((i) => (i.product.id === productId ? { ...i, qty } : i)))
   }
 
   function clearCart() {
     setItems([])
   }
 
-  const totalItems = useMemo(
-    () => items.reduce((sum, i) => sum + i.qty, 0),
-    [items],
-  )
+  const totalItems = useMemo(() => items.reduce((sum, i) => sum + i.qty, 0), [items])
 
   const subtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.qty * i.product.price, 0),
