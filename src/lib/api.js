@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL
+// En produccion el back sirve el front desde el mismo dominio, asi que por
+// defecto las llamadas van al mismo origen. VITE_API_URL solo se usa en
+// desarrollo (front en :5173, back en :4000).
+const API_URL = import.meta.env.VITE_API_URL ?? ''
 
 async function request(path, options) {
   const res = await fetch(`${API_URL}${path}`, {
