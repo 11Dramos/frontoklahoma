@@ -32,8 +32,19 @@ steps:
   - script: npm run lint
     displayName: 'Lint'
 
-  - script: npm test
-    displayName: 'Pruebas unitarias (Vitest)'
+  - script: npm run test:coverage
+    displayName: 'Pruebas unitarias (Vitest) con cobertura'
+
+  - task: PublishCodeCoverageResults@2
+    condition: succeededOrFailed()
+    inputs:
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+    displayName: 'Publicar cobertura en Azure'
+
+  - publish: '$(System.DefaultWorkingDirectory)/coverage'
+    artifact: coverage-front
+    condition: succeededOrFailed()
+    displayName: 'Publicar reporte HTML de cobertura'
 
   - script: npm run build
     displayName: 'Compilar el front'
