@@ -45,7 +45,7 @@ for (const line of diff.split('\n')) {
 
 if (problems.length) {
   console.error('\nHusky bloqueo el commit por malas practicas:\n')
-  for (const p of [...new Set(problems)]) console.error('  x ' + p)
+  for (const p of new Set(problems)) console.error('  x ' + p)
   console.error('\nCorrigelo y vuelve a intentar. Si algo es un falso positivo, avisame y ajustamos la regla.\n')
   process.exit(1)
 }
