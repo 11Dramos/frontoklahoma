@@ -11,7 +11,8 @@ const PAYMENT_METHODS = [
 export default function CheckoutFlow({ open, onClose, fulfillment }) {
   const { items, subtotal, clearCart } = useCart()
   const [address, setAddress] = useState('')
-  const [quote, setQuote] = useState(null)
+  // Cotizacion guardada junto a la direccion para la que se pidio.
+  const [quoteState, setQuoteState] = useState(null)
   const [scheduleMode, setScheduleMode] = useState('asap')
   const [scheduleDay, setScheduleDay] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
@@ -24,15 +25,17 @@ export default function CheckoutFlow({ open, onClose, fulfillment }) {
   // Cotiza el delivery contra el backend cada vez que cambia la dirección
   // (con un pequeño debounce para no disparar una request por cada tecla).
   useEffect(() => {
-    if (fulfillment !== 'delivery' || !address.trim()) {
-      setQuote(null)
-      return
-    }
+    if (fulfillment !== 'delivery' || !address.trim()) return
     const timer = setTimeout(() => {
-      getDeliveryQuote(address).then(setQuote).catch(() => setQuote(null))
+      getDeliveryQuote(address)
+        .then((data) => setQuoteState({ address, data }))
+        .catch(() => setQuoteState(null))
     }, 400)
     return () => clearTimeout(timer)
   }, [address, fulfillment])
+
+  // La cotizacion solo vale si corresponde a la direccion actual y al modo delivery.
+  const quote = fulfillment === 'delivery' && quoteState?.address === address ? quoteState.data : null
 
   const deliveryFee = quote?.fee ?? 0
   const total = subtotal + deliveryFee
