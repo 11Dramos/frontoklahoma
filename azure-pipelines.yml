@@ -32,6 +32,9 @@ steps:
   - script: npm run lint
     displayName: 'Lint'
 
+  - script: npm test
+    displayName: 'Pruebas unitarias (Vitest)'
+
   - script: npm run build
     displayName: 'Compilar el front'
 
