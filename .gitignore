@@ -29,3 +29,4 @@ dist-ssr
 
 # Reportes de cobertura (se generan al correr npm run test:coverage)
 coverage
+.scannerwork
