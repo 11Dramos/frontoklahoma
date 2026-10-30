@@ -14,6 +14,12 @@ pr:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  # Grupo de la Library (Pipelines > Library > oklahoma-front). Debe tener:
+  #   sonar_tokens        token de SonarCloud (marcalo como secreto con el candado)
+  #   sonar_organization  clave de tu organizacion en SonarCloud
+  - group: oklahoma-front
+
 steps:
   # fetchDepth 0: SonarCloud necesita el historial completo para atribuir lineas nuevas.
   - checkout: self
@@ -49,11 +55,12 @@ steps:
     displayName: 'Publicar reporte HTML de cobertura'
 
   # Analisis de calidad en SonarCloud (bugs, vulnerabilidades, code smells, duplicados y cobertura).
-  # Necesita las variables SONAR_TOKEN (secreta) y SONAR_ORGANIZATION del pipeline; si faltan, se omite
-  # sin romper el pipeline. Para que ademas bloquee el despliegue, cambia sonar.qualitygate.wait a true.
+  # Usa sonar_tokens y sonar_organization del grupo oklahoma-front; si faltan, se omite sin romper el
+  # pipeline. Si SonarCloud falla (token invalido, etc.) queda como advertencia y no frena el despliegue.
+  # Para que ademas bloquee por quality gate, cambia sonar.qualitygate.wait a true.
   - script: |
-      if [ -z "$SONAR_TOKEN" ] || [ "$SONAR_TOKEN" = '$(SONAR_TOKEN)' ] || [ -z "$SONAR_ORGANIZATION" ] || [ "$SONAR_ORGANIZATION" = '$(SONAR_ORGANIZATION)' ]; then
-        echo "SonarCloud no configurado (faltan SONAR_TOKEN y SONAR_ORGANIZATION): se omite el analisis."
+      if [ -z "$SONAR_TOKEN" ] || [ "$SONAR_TOKEN" = '$(sonar_tokens)' ] || [ -z "$SONAR_ORGANIZATION" ] || [ "$SONAR_ORGANIZATION" = '$(sonar_organization)' ]; then
+        echo "SonarCloud no configurado (faltan sonar_tokens y sonar_organization en el grupo oklahoma-front): se omite el analisis."
         exit 0
       fi
       npx --yes @sonar/scan \
@@ -64,9 +71,10 @@ steps:
         -Dsonar.qualitygate.wait=false
     displayName: 'Analisis SonarCloud'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    continueOnError: true
     env:
-      SONAR_TOKEN: $(SONAR_TOKEN)
-      SONAR_ORGANIZATION: $(SONAR_ORGANIZATION)
+      SONAR_TOKEN: $(sonar_tokens)
+      SONAR_ORGANIZATION: $(sonar_organization)
 
   - script: npm run build
     displayName: 'Compilar el front'
